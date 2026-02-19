@@ -49,6 +49,13 @@ namespace settings
 		inline int keybind_mode{ 0 };
 	}
 
+	namespace freezepos
+	{
+		inline bool enabled{ false };
+		inline int keybind{ 0 };
+		inline int keybind_mode{ 0 };
+	}
+
 	namespace settings
 	{
 		inline bool hide_console{ false };

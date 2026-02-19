@@ -1,6 +1,9 @@
+#define NOMINMAX
 #include <cstdint>
 #include <chrono>
 #include <thread>
+#include <Windows.h>
+#include <TlHelp32.h>
 
 #include <memory/memory.h>
 #include <sdk/offsets.h>
@@ -10,6 +13,7 @@
 #include <render/render.h>
 #include <features/aimbot/aimbot.h>
 #include <features/walkspeed/walkspeed.h>
+#include <features/desync/freezepos/freezepos.h>
 #include <features/noclip/noclip.h>
 #include <teleport/teleport_handler.h>
 #include <settings.h>
@@ -21,6 +25,16 @@ std::int32_t main()
 	GetConsoleMode(hOut, &dwMode);
 	SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 	printf("\x1b[38;2;169;169;169m- \x1b[38;2;255;255;255mWelcome to seizure \x1b[0;38;5;67;49mnightly \x1b[38;2;169;169;169m0.0.0\x1b[0m\n");
+
+	printf("\x1b[38;2;169;169;169m- \x1b[38;2;255;255;255mFetching \x1b[38;2;169;169;169moffsets...\x1b[0m\n");
+	if (!Offsets::FetchAndLoad())
+	{
+		printf("\x1b[38;2;169;169;169m- \x1b[38;2;255;255;255mFailed to fetch offsets. \x1b[38;2;169;169;169mCheck your internet connection.\x1b[0m\n");
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		return 1;
+	}
+	printf("\x1b[38;2;169;169;169m- \x1b[38;2;255;255;255mLoaded \x1b[38;2;169;169;169m%zu\x1b[38;2;255;255;255m offsets for version \x1b[38;2;169;169;169m%s\x1b[0m\n",
+		Offsets::Map.size(), Offsets::ClientVersion.c_str());
 
 	static const char* BINARY_NAME = "RobloxPlayerBeta.exe";
 
@@ -54,6 +68,7 @@ std::int32_t main()
 
 	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mFound base \x1b[38;2;169;169;169m@ 0x%llx\x1b[0m\n", memory->get_module_address());
 
+	// Detect running Roblox version and warn if it differs from offset version
 	std::string version = "unknown";
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, memory->get_process_id());
 	if (snapshot != INVALID_HANDLE_VALUE)
@@ -66,33 +81,36 @@ std::int32_t main()
 
 			size_t pos = narrow_path.find("version-");
 			if (pos != std::string::npos && pos + 24 <= narrow_path.length())
-			{
 				version = narrow_path.substr(pos, 24);
-			}
 		}
 		CloseHandle(snapshot);
 	}
 
 	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mDetected version \x1b[38;2;169;169;169m- %s\x1b[0m\n", version.c_str());
-	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mOffset version   \x1b[38;2;169;169;169m- %s\x1b[0m\n", Offsets::ClientVersion.c_str());
+	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mOffset  version  \x1b[38;2;169;169;169m- %s\x1b[0m\n", Offsets::ClientVersion.c_str());
 
-	std::uint64_t fake_datamodel{ memory->read<std::uint64_t>(memory->get_module_address() + Offsets::FakeDataModel::Pointer) };
-	game::datamodel = rbx::instance_t(memory->read<std::uint64_t>(fake_datamodel + Offsets::FakeDataModel::RealDataModel));
+	if (version != "unknown" && version != Offsets::ClientVersion)
+	{
+		printf("\x1b[38;2;255;100;100m- - WARNING: version mismatch! Offsets may be outdated.\x1b[0m\n");
+	}
+
+	std::uint64_t fake_datamodel{ memory->read<std::uint64_t>(memory->get_module_address() + OFF(FakeDataModel, Pointer)) };
+	game::datamodel = rbx::instance_t(memory->read<std::uint64_t>(fake_datamodel + OFF(FakeDataModel, RealDataModel)));
 
 	if (game::datamodel.get_name() != "Ugc")
 	{
 		printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mWaiting for \x1b[38;2;169;169;169mdatamodel to load...\x1b[0m\n");
 		while (game::datamodel.get_name() != "Ugc")
 		{
-			std::uint64_t fake_datamodel{ memory->read<std::uint64_t>(memory->get_module_address() + Offsets::FakeDataModel::Pointer) };
-			game::datamodel = rbx::instance_t(memory->read<std::uint64_t>(fake_datamodel + Offsets::FakeDataModel::RealDataModel));
+			std::uint64_t fake_dm{ memory->read<std::uint64_t>(memory->get_module_address() + OFF(FakeDataModel, Pointer)) };
+			game::datamodel = rbx::instance_t(memory->read<std::uint64_t>(fake_dm + OFF(FakeDataModel, RealDataModel)));
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		}
 	}
 
 	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mFound datamodel \x1b[38;2;169;169;169m@ 0x%llx (%s)\x1b[0m\n", game::datamodel.address, game::datamodel.get_name().c_str());
 
-	game::visengine = { memory->read<std::uint64_t>(memory->get_module_address() + Offsets::VisualEngine::Pointer) };
+	game::visengine = { memory->read<std::uint64_t>(memory->get_module_address() + OFF(VisualEngine, Pointer)) };
 	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mFound visualengine \x1b[38;2;169;169;169m@ 0x%llx\x1b[0m\n", game::visengine.address);
 
 	game::workspace = { game::datamodel.find_first_child_by_class("Workspace") };
@@ -106,7 +124,7 @@ std::int32_t main()
 		printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mWaiting for local_player \x1b[38;2;169;169;169mto load...\x1b[0m\n");
 		while (game::local_player.address == 0)
 		{
-			game::local_player = { memory->read<std::uint64_t>(game::players.address + Offsets::Player::LocalPlayer) };
+			game::local_player = { memory->read<std::uint64_t>(game::players.address + OFF(Player, LocalPlayer)) };
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		}
 	}
@@ -131,6 +149,8 @@ std::int32_t main()
 	std::thread(rbx::aimbot::run).detach();
 	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mRunning \x1b[38;2;169;169;169mwalkspeed.h\x1b[0m\n");
 	std::thread(walkspeed::run).detach();
+	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mRunning \x1b[38;2;169;169;169mfreezepos.h\x1b[0m\n");
+	std::thread(freezepos::run).detach();
 	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mExcluded \x1b[38;2;169;169;169mnoclip.h\x1b[0m\n");
 	// std::thread(noclip::run).detach();
 
@@ -170,18 +190,13 @@ std::int32_t main()
 	while (true)
 	{
 		if (settings::settings::should_unload)
-		{
 			break;
-		}
 
 		render->start_render();
-
 		render->render_visuals();
 
 		if (render->running)
-		{
 			render->render_menu();
-		}
 
 		render->end_render();
 	}

@@ -25,6 +25,7 @@ enum ImPages_ : int
 	ImPage_Visuals,
 	ImPage_Filters,
 	ImPage_Movement,
+	ImPage_Desync,
 	ImPage_Settings,
 	ImPages_COUNT
 };

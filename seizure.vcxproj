@@ -100,6 +100,7 @@
     <ClCompile Include="ext\imgui\vendors\Dear ImGui\imgui_widgets.cpp" />
     <ClCompile Include="src\cache\cache.cpp" />
     <ClCompile Include="src\features\aimbot\aimbot.cpp" />
+    <ClCompile Include="src\features\desync\freezepos\freezepos.cpp" />
     <ClCompile Include="src\features\esp\esp.cpp" />
     <ClCompile Include="src\features\noclip\noclip.cpp" />
     <ClCompile Include="src\features\walkspeed\walkspeed.cpp" />
@@ -107,6 +108,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\memory\memory.cpp" />
     <ClCompile Include="src\render\render.cpp" />
+    <ClCompile Include="src\sdk\offsets.cpp" />
     <ClCompile Include="src\sdk\sdk.cpp" />
     <ClCompile Include="src\teleport\teleport_handler.cpp" />
   </ItemGroup>
@@ -129,6 +131,7 @@
     <ClInclude Include="ext\imgui\vendors\Dear ImGui\imstb_truetype.h" />
     <ClInclude Include="src\cache\cache.h" />
     <ClInclude Include="src\features\aimbot\aimbot.h" />
+    <ClInclude Include="src\features\desync\freezepos\freezepos.h" />
     <ClInclude Include="src\features\esp\esp.h" />
     <ClInclude Include="src\features\hitbox_expander\hitbox_expander.h" />
     <ClInclude Include="src\features\noclip\noclip.h" />

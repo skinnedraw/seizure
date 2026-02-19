@@ -54,7 +54,7 @@ namespace rbx
 	{
 		using instance_t::instance_t;
 	};
-	
+
 	struct humanoid_t final : public addressable_t
 	{
 		using addressable_t::addressable_t;
@@ -91,7 +91,7 @@ namespace rbx
 	struct camera_t final : public instance_t
 	{
 		using instance_t::instance_t;
-		
+
 		math::vector3 get_position();
 		math::matrix3 get_rotation();
 		void write_rotation(const math::matrix3& rotation);
@@ -103,16 +103,14 @@ std::vector<T> rbx::interface_t::get_children()
 {
 	rbx::instance_t* base = static_cast<rbx::instance_t*>(this);
 
-	std::uint64_t start = memory->read<std::uint64_t>(base->address + Offsets::Instance::ChildrenStart);
-	std::uint64_t end = memory->read<std::uint64_t>(start + Offsets::Instance::ChildrenEnd);
+	std::uint64_t start = memory->read<std::uint64_t>(base->address + OFF(Instance, ChildrenStart));
+	std::uint64_t end = memory->read<std::uint64_t>(start + OFF(Instance, ChildrenEnd));
 
 	std::vector<T> children;
 	children.reserve(32);
 
 	for (std::uint64_t instance = memory->read<std::uint64_t>(start); instance != end; instance += sizeof(std::shared_ptr<void*>))
-	{
 		children.emplace_back(memory->read<std::uint64_t>(instance));
-	}
 
 	return children;
 }

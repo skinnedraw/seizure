@@ -105,7 +105,7 @@ namespace noclip
 						continue;
 
 					// Read and cache the ORIGINAL flags
-					std::uint8_t original_flags = memory->read<std::uint8_t>(prim.address + Offsets::Primitive::Flags);
+					std::uint8_t original_flags = memory->read<std::uint8_t>(prim.address + OFF(Primitive, Flags));
 
 					// Only cache if primitive is valid
 					if (original_flags != 0 && original_flags != 0xFF)
@@ -144,7 +144,7 @@ namespace noclip
 			for (const auto& cached_prim : cached_primitives)
 			{
 				// Try to read flags - if this fails, the primitive is invalid
-				std::uint8_t test_flags = memory->read<std::uint8_t>(cached_prim.address + Offsets::Primitive::Flags);
+				std::uint8_t test_flags = memory->read<std::uint8_t>(cached_prim.address + OFF(Primitive, Flags));
 				if (test_flags == 0 || test_flags == 0xFF)
 				{
 					cache_invalid = true;
@@ -166,13 +166,13 @@ namespace noclip
 				if (should_noclip)
 				{
 					// Disable CanCollide flag
-					std::uint8_t current_flags = memory->read<std::uint8_t>(cached_prim.address + Offsets::Primitive::Flags);
-					memory->write<std::uint8_t>(cached_prim.address + Offsets::Primitive::Flags, current_flags & ~Offsets::PrimitiveFlags::CanCollide);
+					std::uint8_t current_flags = memory->read<std::uint8_t>(cached_prim.address + OFF(Primitive, Flags));
+					memory->write<std::uint8_t>(cached_prim.address + OFF(Primitive, Flags), current_flags & ~OFF(Primitive, CanCollide));
 				}
 				else
 				{
 					// Restore original flags
-					memory->write<std::uint8_t>(cached_prim.address + Offsets::Primitive::Flags, cached_prim.original_flags);
+					memory->write<std::uint8_t>(cached_prim.address + OFF(Primitive, Flags), cached_prim.original_flags);
 				}
 			}
 		}

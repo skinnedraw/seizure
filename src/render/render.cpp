@@ -65,6 +65,7 @@ render_t::render_t()
     m_Tabs.push_back("Visuals");
     m_Tabs.push_back("Filters");
     m_Tabs.push_back("Movement");
+    m_Tabs.push_back("Desync");
     m_Tabs.push_back("Settings");
 }
 
@@ -857,6 +858,20 @@ void render_t::render_page_content(float group_width)
         }
         ImGui::EndGroup();
     }
+    else if (m_iCurrentPage == ImPage_Desync)
+    {
+        ImGui::BeginGroup();
+        {
+            begin_child_styled("FFlags", ImVec2(group_width, ImGui::GetFontSize() * 1.5f + style.ItemSpacing.y + style.WindowPadding.y * 2));
+            {
+                checkbox_hover("Enable", &settings::freezepos::enabled);
+                ImGui::SameLine();
+                keybind_button("freezepos", &settings::freezepos::keybind, &settings::freezepos::keybind_mode, 0);
+            }
+            end_child_styled();
+        }
+        ImGui::EndGroup();
+    }
     else if (m_iCurrentPage == ImPage_Settings)
     {
         ImGui::BeginGroup();
@@ -885,12 +900,12 @@ void render_t::render_page_content(float group_width)
 
                 if (ImAdd::Button("Rescan", ImVec2(button_width, button_height)))
                 {
-                    std::uint64_t fake_datamodel = memory->read<std::uint64_t>(memory->get_module_address() + Offsets::FakeDataModel::Pointer);
-                    game::datamodel = rbx::instance_t(memory->read<std::uint64_t>(fake_datamodel + Offsets::FakeDataModel::RealDataModel));
-                    game::visengine = { memory->read<std::uint64_t>(memory->get_module_address() + Offsets::VisualEngine::Pointer) };
+                    std::uint64_t fake_datamodel = memory->read<std::uint64_t>(memory->get_module_address() + OFF(FakeDataModel, Pointer));
+                    game::datamodel = rbx::instance_t(memory->read<std::uint64_t>(fake_datamodel + OFF(FakeDataModel, RealDataModel)));
+                    game::visengine = { memory->read<std::uint64_t>(memory->get_module_address() + OFF(VisualEngine, Pointer)) };
                     game::workspace = { game::datamodel.find_first_child_by_class("Workspace") };
                     game::players = { game::datamodel.find_first_child_by_class("Players") };
-                    game::local_player = { memory->read<std::uint64_t>(game::players.address + Offsets::Player::LocalPlayer) };
+                    game::local_player = { memory->read<std::uint64_t>(game::players.address + OFF(Player, LocalPlayer)) };
 
                     {
                         std::lock_guard<std::mutex> lock(cache::mtx);
@@ -909,7 +924,7 @@ void render_t::render_page_content(float group_width)
             end_child_styled();
         }
         ImGui::EndGroup();
-       }
+    }
 }
 
 void render_t::render_menu()

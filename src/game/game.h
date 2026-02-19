@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <sdk/sdk.h>
+#include <sdk/offsets.h>
 #include <Windows.h>
 #include <winhttp.h>
 #include <string>
@@ -118,7 +119,7 @@ namespace game
 	inline void detect_game()
 	{
 		std::uint64_t place_id =
-			memory->read<std::uint64_t>(datamodel.address + Offsets::DataModel::PlaceId);
+			memory->read<std::uint64_t>(datamodel.address + OFF(DataModel, PlaceId));
 
 		is_rivals = (place_id == 17625359962ULL || place_id == 117398147513099ULL);
 

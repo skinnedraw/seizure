@@ -57,8 +57,8 @@ namespace walkspeed
 						rbx::humanoid_t humanoid = { model_instance.find_first_child("Humanoid").address };
 						if (humanoid.address != 0 && original_speed_set)
 						{
-							memory->write<float>(humanoid.address + Offsets::Humanoid::Walkspeed, original_speed);
-							memory->write<float>(humanoid.address + Offsets::Humanoid::WalkspeedCheck, original_speed);
+							memory->write<float>(humanoid.address + OFF(Humanoid, Walkspeed), original_speed);
+							memory->write<float>(humanoid.address + OFF(Humanoid, WalkspeedCheck), original_speed);
 						}
 					}
 				}
@@ -79,20 +79,19 @@ namespace walkspeed
 
 			if (!original_speed_set)
 			{
-				original_speed = memory->read<float>(humanoid.address + Offsets::Humanoid::Walkspeed);
+				original_speed = memory->read<float>(humanoid.address + OFF(Humanoid, Walkspeed));
 				original_speed_set = true;
 			}
 
-			float current_speed = memory->read<float>(humanoid.address + Offsets::Humanoid::Walkspeed);
+			float current_speed = memory->read<float>(humanoid.address + OFF(Humanoid, Walkspeed));
 			if (current_speed != settings::walkspeed::speed)
 			{
 				for (int i = 0; i < 25000; i++)
 				{
-					memory->write<float>(humanoid.address + Offsets::Humanoid::Walkspeed, settings::walkspeed::speed);
-					memory->write<float>(humanoid.address + Offsets::Humanoid::WalkspeedCheck, settings::walkspeed::speed);
+					memory->write<float>(humanoid.address + OFF(Humanoid, Walkspeed), settings::walkspeed::speed);
+					memory->write<float>(humanoid.address + OFF(Humanoid, WalkspeedCheck), settings::walkspeed::speed);
 				}
 			}
 		}
 	}
 }
-
