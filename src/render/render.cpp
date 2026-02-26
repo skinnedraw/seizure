@@ -62,6 +62,7 @@ render_t::render_t()
 
     // Initialize tab names
     m_Tabs.push_back("Aimbot");
+    m_Tabs.push_back("Silent Aim");
     m_Tabs.push_back("Visuals");
     m_Tabs.push_back("Filters");
     m_Tabs.push_back("Movement");
@@ -793,6 +794,57 @@ void render_t::render_page_content(float group_width)
         }
         ImGui::EndGroup();
     }
+    else if (m_iCurrentPage == ImPage_SilentAim)
+    {
+        ImGui::BeginGroup(); // Left column
+        {
+            begin_child_styled("General", ImVec2(group_width, ImGui::GetFontSize() * 4.5f + style.ItemSpacing.y * 3 + style.WindowPadding.y * 2));
+            {
+                checkbox_hover("Enable", &settings::silentaim::enabled);
+                ImGui::SameLine();
+                keybind_button("SilentAimKey", &settings::silentaim::keybind, &settings::silentaim::keybind_mode, 0);
+
+                checkbox_hover("Sticky Aim", &settings::silentaim::sticky_aim);
+            }
+            end_child_styled();
+
+            begin_child_styled("Configs", ImVec2(group_width, ImGui::GetFontSize() * 6.0f + style.ItemSpacing.y * 2 + style.ItemInnerSpacing.y * 3 + style.WindowPadding.y * 2));
+            {
+                ImGui::PushItemWidth(ImGui::GetWindowWidth() - style.WindowPadding.x * 2);
+                {
+                    ImAdd::SliderFloat("Field of View", &settings::silentaim::fov, 10.0f, 500.0f, "%.1f");
+
+                    checkbox_hover("Use Prediction", &settings::silentaim::use_prediction);
+
+                    if (settings::silentaim::use_prediction)
+                    {
+                        ImAdd::SliderFloat("Prediction Time", &settings::silentaim::prediction_time, 0.01f, 0.2f, "%.3f");
+                    }
+                }
+                ImGui::PopItemWidth();
+            }
+            end_child_styled();
+        }
+        ImGui::EndGroup();
+
+        ImGui::SameLine();
+
+        ImGui::BeginGroup(); // Right column
+        {
+            begin_child_styled("Overlay", ImVec2(group_width, ImGui::GetFontSize() * 3.0f + style.ItemSpacing.y * 2 + style.WindowPadding.y * 2));
+            {
+                checkbox_hover("FOV Circle", &settings::silentaim::show_fov);
+                ImGui::SameLine(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 2 - style.WindowPadding.x);
+                ImAdd::ColorEdit4("##Silent FOV Circle Color", settings::silentaim::fov_color);
+
+                checkbox_hover("Show Tracer", &settings::silentaim::show_tracer);
+                ImGui::SameLine(ImGui::GetWindowWidth() - ImGui::GetFontSize() * 2 - style.WindowPadding.x);
+                ImAdd::ColorEdit4("##Tracer Color", settings::silentaim::tracer_color);
+            }
+            end_child_styled();
+        }
+        ImGui::EndGroup();
+    }
     else if (m_iCurrentPage == ImPage_Visuals)
     {
         ImGui::BeginGroup();
@@ -862,11 +914,17 @@ void render_t::render_page_content(float group_width)
     {
         ImGui::BeginGroup();
         {
-            begin_child_styled("FFlags", ImVec2(group_width, ImGui::GetFontSize() * 1.5f + style.ItemSpacing.y + style.WindowPadding.y * 2));
+            begin_child_styled("FFlags", ImVec2(group_width, ImGui::GetFontSize() * 3 + style.ItemSpacing.y + style.WindowPadding.y * 2));
             {
-                checkbox_hover("Enable", &settings::freezepos::enabled);
+                checkbox_hover("Freeze pos", &settings::freezepos::enabled);
                 ImGui::SameLine();
                 keybind_button("freezepos", &settings::freezepos::keybind, &settings::freezepos::keybind_mode, 0);
+
+                ImGui::Spacing();
+
+                checkbox_hover("Void Hide", &settings::voidhide::enabled);
+                ImGui::SameLine();
+                keybind_button("VoidHideKey", &settings::voidhide::keybind, &settings::voidhide::keybind_mode, 0);
             }
             end_child_styled();
         }
@@ -1012,6 +1070,63 @@ void render_t::render_visuals()
 
             ImDrawList* draw = ImGui::GetBackgroundDrawList();
             draw->AddCircle(center, radius, color, 0, 2.0f);
+        }
+    }
+
+    if (settings::silentaim::show_fov)
+    {
+        HWND rblxWnd = FindWindowA(nullptr, "Roblox");
+        if (rblxWnd)
+        {
+            // Silent aim FOV is always centered on mouse cursor
+            POINT cursor_point;
+            GetCursorPos(&cursor_point);
+            ScreenToClient(rblxWnd, &cursor_point);
+            ImVec2 center = ImVec2(static_cast<float>(cursor_point.x), static_cast<float>(cursor_point.y));
+
+            float radius = settings::silentaim::fov;
+
+            ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(
+                settings::silentaim::fov_color[0],
+                settings::silentaim::fov_color[1],
+                settings::silentaim::fov_color[2],
+                settings::silentaim::fov_color[3]
+            ));
+
+            ImDrawList* draw = ImGui::GetBackgroundDrawList();
+            draw->AddCircle(center, radius, color, 0, 2.0f);
+        }
+    }
+
+    // Silent Aim Tracer
+    if (settings::silentaim::show_tracer && rbx::silentaim::has_target)
+    {
+        HWND rblxWnd = FindWindowA(nullptr, "Roblox");
+        if (rblxWnd)
+        {
+            // Get mouse position
+            POINT cursor_point;
+            GetCursorPos(&cursor_point);
+            ScreenToClient(rblxWnd, &cursor_point);
+            ImVec2 cursor_pos = ImVec2(static_cast<float>(cursor_point.x), static_cast<float>(cursor_point.y));
+
+            // Get target screen position
+            math::vector2 dims = game::visengine.get_dimensions();
+            math::matrix4 view = game::visengine.get_viewmatrix();
+            math::vector2 target_screen;
+
+            if (game::visengine.world_to_screen(rbx::silentaim::current_target_position, target_screen, dims, view))
+            {
+                ImU32 color = ImGui::ColorConvertFloat4ToU32(ImVec4(
+                    settings::silentaim::tracer_color[0],
+                    settings::silentaim::tracer_color[1],
+                    settings::silentaim::tracer_color[2],
+                    settings::silentaim::tracer_color[3]
+                ));
+
+                ImDrawList* draw = ImGui::GetBackgroundDrawList();
+                draw->AddLine(cursor_pos, ImVec2(target_screen.x, target_screen.y), color, 2.0f);
+            }
         }
     }
 }

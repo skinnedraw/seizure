@@ -98,6 +98,11 @@ math::vector3 rbx::primitive_t::get_position()
 	return memory->read<math::vector3>(this->address + OFF(Primitive, Position));
 }
 
+void rbx::primitive_t::set_position(const math::vector3& pos)
+{
+	memory->write<math::vector3>(this->address + OFF(Primitive, Position), pos);
+}
+
 math::matrix3 rbx::primitive_t::get_rotation()
 {
 	return memory->read<math::matrix3>(this->address + OFF(Primitive, Rotation));

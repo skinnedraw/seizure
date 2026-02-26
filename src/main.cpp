@@ -12,8 +12,10 @@
 #include <cache/cache.h>
 #include <render/render.h>
 #include <features/aimbot/aimbot.h>
+#include <features/silentaim/silentaim.h>
 #include <features/walkspeed/walkspeed.h>
 #include <features/desync/freezepos/freezepos.h>
+#include <features/desync/voidhide/voidhide.h>
 #include <features/noclip/noclip.h>
 #include <teleport/teleport_handler.h>
 #include <settings.h>
@@ -147,10 +149,14 @@ std::int32_t main()
 	rbx::aimbot::initialize();
 	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mRunning \x1b[38;2;169;169;169maimbot.h\x1b[0m\n");
 	std::thread(rbx::aimbot::run).detach();
+	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mRunning \x1b[38;2;169;169;169msilentaim.h\x1b[0m\n");
+	std::thread(rbx::silentaim::run).detach();
 	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mRunning \x1b[38;2;169;169;169mwalkspeed.h\x1b[0m\n");
 	std::thread(walkspeed::run).detach();
 	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mRunning \x1b[38;2;169;169;169mfreezepos.h\x1b[0m\n");
 	std::thread(freezepos::run).detach();
+	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mRunning \x1b[38;2;169;169;169mvoidhide.h\x1b[0m\n");
+	// std::thread(voidhide::run).detach();
 	printf("\x1b[38;2;169;169;169m- - \x1b[38;2;255;255;255mExcluded \x1b[38;2;169;169;169mnoclip.h\x1b[0m\n");
 	// std::thread(noclip::run).detach();
 

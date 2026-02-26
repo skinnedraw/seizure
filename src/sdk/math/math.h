@@ -1,10 +1,26 @@
 ﻿#pragma once
+#include <cmath>
 
 namespace math
 {
 	struct vector2 final
 	{
 		float x{ 0.f }, y{ 0.f };
+
+		float magnitude() const
+		{
+			return std::sqrtf(x * x + y * y);
+		}
+
+		vector2 operator-(const vector2& other) const
+		{
+			return { x - other.x, y - other.y };
+		}
+	};
+
+	struct vector2int16 final
+	{
+		std::int16_t x{ 0 }, y{ 0 };
 	};
 
 	struct vector3 final

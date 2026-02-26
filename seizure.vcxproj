@@ -101,8 +101,10 @@
     <ClCompile Include="src\cache\cache.cpp" />
     <ClCompile Include="src\features\aimbot\aimbot.cpp" />
     <ClCompile Include="src\features\desync\freezepos\freezepos.cpp" />
+    <ClCompile Include="src\features\desync\voidhide\voidhide.cpp" />
     <ClCompile Include="src\features\esp\esp.cpp" />
     <ClCompile Include="src\features\noclip\noclip.cpp" />
+    <ClCompile Include="src\features\silentaim\silentaim.cpp" />
     <ClCompile Include="src\features\walkspeed\walkspeed.cpp" />
     <ClCompile Include="src\keybind\keybind.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -132,9 +134,11 @@
     <ClInclude Include="src\cache\cache.h" />
     <ClInclude Include="src\features\aimbot\aimbot.h" />
     <ClInclude Include="src\features\desync\freezepos\freezepos.h" />
+    <ClInclude Include="src\features\desync\voidhide\voidhide.h" />
     <ClInclude Include="src\features\esp\esp.h" />
     <ClInclude Include="src\features\hitbox_expander\hitbox_expander.h" />
     <ClInclude Include="src\features\noclip\noclip.h" />
+    <ClInclude Include="src\features\silentaim\silentaim.h" />
     <ClInclude Include="src\features\walkspeed\walkspeed.h" />
     <ClInclude Include="src\game\game.h" />
     <ClInclude Include="src\keybind\keybind.h" />

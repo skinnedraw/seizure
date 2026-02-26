@@ -22,6 +22,7 @@ struct detail_t {
 enum ImPages_ : int
 {
 	ImPage_Aimbot,
+	ImPage_SilentAim,
 	ImPage_Visuals,
 	ImPage_Filters,
 	ImPage_Movement,

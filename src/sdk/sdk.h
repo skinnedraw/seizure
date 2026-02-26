@@ -76,6 +76,7 @@ namespace rbx
 		math::vector3 get_size();
 		void set_size(const math::vector3& size);
 		math::vector3 get_position();
+		void set_position(const math::vector3& pos); // added for voidhide / fakepos
 		math::matrix3 get_rotation();
 		bool get_can_collide();
 		bool set_can_collide(bool enable);
